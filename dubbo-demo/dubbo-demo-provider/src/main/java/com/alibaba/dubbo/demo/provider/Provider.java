@@ -26,7 +26,7 @@ public class Provider {
         System.setProperty("java.net.preferIPv4Stack", "true");
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"META-INF/spring/dubbo-demo-provider.xml"});
         context.start();
-
+        // 保留问题：是如何调用servicebean类的？
         System.in.read(); // press any key to exit
     }
 

@@ -53,6 +53,10 @@ import static com.alibaba.dubbo.config.spring.util.BeanFactoryUtils.addApplicati
 public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean, DisposableBean,
         ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>, BeanNameAware,
         ApplicationEventPublisherAware {
+    // ApplicationContextAware 获取到IOC容器
+    // ApplicationListener<ContextRefreshedEvent>  监听初始化或刷新容器 执行onApplicationEvent方法 https://blog.csdn.net/liyantianmin/article/details/81017960
+    // BeanNameAware获取容器中的名字
+    // ApplicationEventPublisherAware 发布事件 https://blog.csdn.net/qq_28060549/article/details/81073001
 
     private static final long serialVersionUID = 213195494150089726L;
 
