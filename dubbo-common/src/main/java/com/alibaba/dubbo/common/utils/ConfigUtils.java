@@ -174,11 +174,14 @@ public class ConfigUtils {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static String getProperty(String key, String defaultValue) {
+        // 获取系统属性
         String value = System.getProperty(key);
         if (value != null && value.length() > 0) {
             return value;
         }
+        // 加载配置文件
         Properties properties = getProperties();
+        // 从配置文件中取到配置，
         return replaceProperty(properties.getProperty(key, defaultValue), (Map) properties);
     }
 
