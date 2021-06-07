@@ -59,6 +59,7 @@ public abstract class AbstractConfig implements Serializable {
     private static final Pattern PATTERN_NAME_HAS_SYMBOL = Pattern.compile("[:*,\\s/\\-._0-9a-zA-Z]+");
 
     private static final Pattern PATTERN_KEY = Pattern.compile("[*,\\-._0-9a-zA-Z]+");
+
     private static final Map<String, String> legacyProperties = new HashMap<String, String>();
     private static final String[] SUFFIXES = new String[]{"Config", "Bean"};
 
@@ -129,6 +130,7 @@ public abstract class AbstractConfig implements Serializable {
                             }
                         }
                         if (getter != null) {
+                            // 这个invoke方法做了什么？
                             if (getter.invoke(config) == null) {
                                 if (config.getId() != null && config.getId().length() > 0) {
                                     value = ConfigUtils.getProperty(prefix + config.getId() + "." + property);
