@@ -67,26 +67,31 @@ public class ExtensionLoader<T> {
     private static final String DUBBO_INTERNAL_DIRECTORY = DUBBO_DIRECTORY + "internal/";
 
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
-
+    // 缓存的扩展点？
+    // 疑问：扩展点更新怎么办，重启服务？
     private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<Class<?>, ExtensionLoader<?>>();
-
+    // 缓存的扩展点实例？
+    // 疑问：发生更新怎么办，重启服务？
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<Class<?>, Object>();
 
     // ==============================
-
+    // 当前 service类
     private final Class<?> type;
 
     private final ExtensionFactory objectFactory;
 
     private final ConcurrentMap<Class<?>, String> cachedNames = new ConcurrentHashMap<Class<?>, String>();
-
+    // 缓存的字节码文件
     private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<Map<String, Class<?>>>();
 
     private final Map<String, Activate> cachedActivates = new ConcurrentHashMap<String, Activate>();
     private final ConcurrentMap<String, Holder<Object>> cachedInstances = new ConcurrentHashMap<String, Holder<Object>>();
+    // 缓存的自适应实例
     private final Holder<Object> cachedAdaptiveInstance = new Holder<Object>();
     private volatile Class<?> cachedAdaptiveClass = null;
+    // 缓存默认的什么名字？
     private String cachedDefaultName;
+    // 缓存的自适应实例的错误集
     private volatile Throwable createAdaptiveInstanceError;
 
     private Set<Class<?>> cachedWrapperClasses;
@@ -113,7 +118,7 @@ public class ExtensionLoader<T> {
             throw new IllegalArgumentException("Extension type(" + type +
                     ") is not extension, because WITHOUT @" + SPI.class.getSimpleName() + " Annotation!");
         }
-
+        // 从扩展点缓存中取，取不到重新创建
         ExtensionLoader<T> loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
         if (loader == null) {
             EXTENSION_LOADERS.putIfAbsent(type, new ExtensionLoader<T>(type));
@@ -315,6 +320,7 @@ public class ExtensionLoader<T> {
     }
 
     /**
+     * 获取默认的拓展点？
      * Return default extension, return <code>null</code> if it's not configured.
      */
     public T getDefaultExtension() {
@@ -432,6 +438,8 @@ public class ExtensionLoader<T> {
         }
     }
 
+    // 获取自适应类
+    // 若缓存中有，取缓存，若无，创建并放在缓存中
     @SuppressWarnings("unchecked")
     public T getAdaptiveExtension() {
         Object instance = cachedAdaptiveInstance.get();
@@ -508,6 +516,7 @@ public class ExtensionLoader<T> {
         }
     }
 
+    // 注入这个扩展
     private T injectExtension(T instance) {
         try {
             if (objectFactory != null) {
@@ -552,6 +561,7 @@ public class ExtensionLoader<T> {
         return clazz;
     }
 
+    // 获取扩展点字节码文件？
     private Map<String, Class<?>> getExtensionClasses() {
         Map<String, Class<?>> classes = cachedClasses.get();
         if (classes == null) {
@@ -566,13 +576,17 @@ public class ExtensionLoader<T> {
         return classes;
     }
 
+    // 按优先级读取配置文件，加载自适应字节码文件
     // synchronized in getExtensionClasses
     private Map<String, Class<?>> loadExtensionClasses() {
         final SPI defaultAnnotation = type.getAnnotation(SPI.class);
         if (defaultAnnotation != null) {
+            // 获取@SPI注解value？
             String value = defaultAnnotation.value();
             if ((value = value.trim()).length() > 0) {
+                // 按规则拆分value，没看懂规则。。。
                 String[] names = NAME_SEPARATOR.split(value);
+                // 只能有一个默认的扩展类
                 if (names.length > 1) {
                     throw new IllegalStateException("more than 1 default extension name on extension " + type.getName()
                             + ": " + Arrays.toString(names));
@@ -588,6 +602,7 @@ public class ExtensionLoader<T> {
         return extensionClasses;
     }
 
+    // 加载资源
     private void loadDirectory(Map<String, Class<?>> extensionClasses, String dir) {
         String fileName = dir + type.getName();
         try {
@@ -610,6 +625,7 @@ public class ExtensionLoader<T> {
         }
     }
 
+    // 加载资源
     private void loadResource(Map<String, Class<?>> extensionClasses, ClassLoader classLoader, java.net.URL resourceURL) {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(resourceURL.openStream(), "utf-8"));
@@ -717,6 +733,7 @@ public class ExtensionLoader<T> {
         return extension.value();
     }
 
+    // 创建自适应类
     @SuppressWarnings("unchecked")
     private T createAdaptiveExtension() {
         try {
@@ -726,6 +743,7 @@ public class ExtensionLoader<T> {
         }
     }
 
+    // 获取自适应字节码文件
     private Class<?> getAdaptiveExtensionClass() {
         getExtensionClasses();
         if (cachedAdaptiveClass != null) {
